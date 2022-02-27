@@ -1,0 +1,172 @@
+/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
+import java_cup.runtime.*;
+
+parser code {:
+    // Connect this parser to a scanner!
+
+
+
+  public parser(scanner s, ComplexSymbolFactory sf) {
+    super(s,sf);
+  }
+:}
+
+/* define how to connect to the scanner! */
+
+
+
+/* Terminals (tokens returned by the scanner). */
+terminal            IF, WHILE, BOOLEAN, ELSE, BREAK, RETURN, INT, TRUE, FALSE, VOID;
+terminal            GT, GE, LT, LE, EQQ, DOT, ORB, CRB, OCB, CCB, OSB, CSB;
+terminal            AND, OR, SEMI_COLON, COMMA, NE, EX, PLUS, MINUS, EQ;
+terminal            DIVIDE, STAR, MOD, STRING, OPEN_STRING, INVALID_ESCAPE_CHARACTER, ID;
+terminal Integer    NUMBER;
+terminal            SEMI, TIMES;
+terminal            UMINUS, LPAREN, RPAREN;
+
+
+/* Non terminals */
+non terminal            start_;
+nonterminal             globaldeclarations, globaldeclaration, literal, type, variabledeclaration, identifier, functiondeclaration, functionheader;
+nonterminal             functiondeclarator, formalparameterlist, formalparameter, mainfunctiondeclaration, mainfunctiondeclarator, block, blockstatements, blockstatement, statement, statementexpression, primary;
+nonterminal             argumentlist, functioninvocation, postfixexpression, unaryexpression, multiplicativeexpression, additiveexpression, relationalexpression, equalityexpression, conditionalandexpression, conditionalorexpression;
+nonterminal             assignmentexpression, assignment, expression, elsestatement;
+    // used to store evaluated subexpressions
+
+/* Precedences */
+precedence left PLUS, MINUS;
+precedence left STAR, MOD;
+precedence left UMINUS;
+
+/* The grammar rules */
+start_           ::= globaldeclarations
+                ;
+
+literal         ::= NUMBER
+                | STRING
+                | TRUE
+                | FALSE
+                ;
+
+type            ::= BOOLEAN
+                | INT
+                ;
+
+globaldeclarations      ::= globaldeclaration
+                        | globaldeclarations globaldeclaration
+                        ;
+
+globaldeclaration       ::= variabledeclaration
+                        | functiondeclaration
+                        | mainfunctiondeclaration
+                        ;
+
+variabledeclaration     ::= type identifier SEMI_COLON
+                        ;
+
+identifier              ::= ID
+                        ;
+
+functiondeclaration     ::= functionheader block
+                        ;
+
+functionheader          ::= type functiondeclarator
+                        | VOID functiondeclarator
+                        ;
+
+functiondeclarator      ::= identifier ORB formalparameterlist CRB
+                        | identifier ORB CRB
+                        ;
+
+formalparameterlist     ::= formalparameter
+                        | formalparameterlist COMMA formalparameter
+                        ;
+
+formalparameter         ::= type identifier
+                        ;
+
+mainfunctiondeclaration ::= mainfunctiondeclarator block
+                        ;
+
+mainfunctiondeclarator  ::= identifier ORB CRB
+                        ;
+
+block                   ::= OCB blockstatements CCB
+                        | OCB CCB
+                        ;
+
+blockstatements         ::= blockstatement
+                        | blockstatements blockstatement
+                        ;
+
+blockstatement          ::= variabledeclaration
+                        | statement
+                        ;
+
+
+
+statementexpression     ::= assignment
+                        | functioninvocation
+                        ;
+
+primary                 ::= literal
+                        | ORB expression CRB
+                        | functioninvocation
+                        ;
+
+argumentlist            ::= expression
+                        | argumentlist COMMA expression
+                        ;
+
+functioninvocation      ::= identifier ORB argumentlist CRB
+                        | identifier ORB CRB
+                        ;
+
+postfixexpression       ::= primary
+                        | identifier
+                        ;
+
+assignment              ::= identifier EQ assignmentexpression
+                        ;
+
+unaryexpression         ::= MINUS unaryexpression
+                        | EX unaryexpression
+                        | postfixexpression
+                        ;
+
+multiplicativeexpression::= unaryexpression
+                        | multiplicativeexpression STAR unaryexpression
+                        | multiplicativeexpression DIVIDE unaryexpression
+                        | multiplicativeexpression MOD unaryexpression
+                        ;
+
+additiveexpression      ::= multiplicativeexpression
+                        | additiveexpression PLUS multiplicativeexpression
+                        | additiveexpression MINUS multiplicativeexpression
+                        ;
+
+relationalexpression    ::= additiveexpression
+                        | relationalexpression LE additiveexpression
+                        | relationalexpression GE additiveexpression
+                        ;
+
+equalityexpression      ::= relationalexpression
+                        | equalityexpression EQ relationalexpression
+                        | equalityexpression NE relationalexpression
+                        ;
+
+conditionalandexpression::= equalityexpression
+                        | conditionalandexpression AND equalityexpression
+                        ;
+
+conditionalorexpression ::= conditionalandexpression
+                        | conditionalorexpression OR conditionalandexpression
+                        ;
+
+assignmentexpression    ::= conditionalorexpression
+                        | assignment
+                        ;
+
+expression              ::= assignmentexpression
+                        ;
+
