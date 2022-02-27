@@ -5,9 +5,10 @@ parser code {:
     // Connect this parser to a scanner!
 
 
-
-  public parser(scanner s, ComplexSymbolFactory sf) {
+   Node n;
+  public parser(scanner s, ComplexSymbolFactory sf, Node n) {
     super(s,sf);
+    this.n = n;
   }
 :}
 
@@ -39,7 +40,7 @@ precedence left STAR, MOD;
 precedence left UMINUS;
 
 /* The grammar rules */
-start_           ::= globaldeclarations
+start_           ::= globaldeclarations : v {:n.addNode(v);:}
                 ;
 
 literal         ::= NUMBER
@@ -49,22 +50,22 @@ literal         ::= NUMBER
                 ;
 
 type            ::= BOOLEAN
-                | INT
+                | INT:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 ;
 
-globaldeclarations      ::= globaldeclaration
+globaldeclarations      ::= globaldeclaration: g {:Node n = new Node("globaldeclarations"); n.addNode(g); RESULT = n;:}
                         | globaldeclarations globaldeclaration
                         ;
 
-globaldeclaration       ::= variabledeclaration
+globaldeclaration       ::= variabledeclaration: v {:Node n = new Node("globaldeclaration"); n.addNode(v); RESULT = n;:}
                         | functiondeclaration
                         | mainfunctiondeclaration
                         ;
 
-variabledeclaration     ::= type identifier SEMI_COLON
+variabledeclaration     ::= type:t identifier:i SEMI_COLON {:RESULT = n; Node n = new Node("variabledeclaration"); n.addNode(t); n.addNode(i);RESULT = n;:}
                         ;
 
-identifier              ::= ID
+identifier              ::= ID:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                         ;
 
 functiondeclaration     ::= functionheader block
@@ -103,6 +104,16 @@ blockstatement          ::= variabledeclaration
                         | statement
                         ;
 
+statement               ::= block
+                        | SEMI_COLON
+                        | statementexpression SEMI_COLON
+                        | BREAK SEMI_COLON
+                        | RETURN expression SEMI_COLON
+                        | RETURN SEMI_COLON
+                        | IF ORB expression CRB statement
+                        | IF ORB expression CRB statement ELSE statement
+                        | WHILE ORB expression CRB statement
+                        ;
 
 
 statementexpression     ::= assignment
@@ -148,10 +159,13 @@ additiveexpression      ::= multiplicativeexpression
 relationalexpression    ::= additiveexpression
                         | relationalexpression LE additiveexpression
                         | relationalexpression GE additiveexpression
+                        | relationalexpression GT additiveexpression
+                        | relationalexpression LT additiveexpression
+
                         ;
 
 equalityexpression      ::= relationalexpression
-                        | equalityexpression EQ relationalexpression
+                        | equalityexpression EQQ relationalexpression
                         | equalityexpression NE relationalexpression
                         ;
 

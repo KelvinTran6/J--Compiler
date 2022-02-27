@@ -13,15 +13,25 @@ public class Main {
             BufferedReader r = new BufferedReader(is) ;
 
             ComplexSymbolFactory csf = new ComplexSymbolFactory();
+            Node start = new Node();
+
             scanner s = new scanner(r, csf);
-            parser p = new parser(s, csf);
-            p.parse();
-
-
+            parser p = new parser(s, csf, start);
+            Symbol symm = p.parse();
+            dfs(start);
         }  
         catch(FileNotFoundException e) {
             System.out.println(e);
             System.exit(1);
         }
     }
+
+    static void dfs(Node n) {
+        System.out.println(n.value);
+        for(int i = 0; i < n.children.size(); i++) {
+            Node current = n.children.get(i);
+            dfs(current);
+        }
+    }
+
 }

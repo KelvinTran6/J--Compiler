@@ -1,6 +1,6 @@
 compile:
 	jflex scanner.flex
-	java -jar java-cup-11b.jar parser.cup  
+	java -jar java-cup-11b.jar -expect 2 parser.cup
 
 	javac -classpath java-cup-11b-runtime.jar sym.java
 

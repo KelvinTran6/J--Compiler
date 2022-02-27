@@ -363,15 +363,18 @@ public class scanner implements java_cup.runtime.Scanner {
     }
 
 
-    private Symbol symbol(int type) {
-        return new Symbol(type, yyline, yycolumn);
+    private Symbol symbol(String name, int type) {
+            Node current = new Node(name, yyline, yycolumn);
+        return symbolFactory.newSymbol(yytext(), type, current);
     }
 
-    private Symbol symbol(String name, int type, Object value) {
+      private Symbol symbol(String name, int sym, Object val) {
+          Location left = new Location(yyline+1,yycolumn+1,(int)yychar);
+          Location right= new Location(yyline+1,yycolumn+yylength(), (int)yychar+yylength());
+          Node current = new Node(yytext(), yyline, yycolumn);
 
-            System.out.println(name);
-        return symbolFactory.newSymbol(name, type);
-    }
+          return symbolFactory.newSymbol(name, sym, left, right, current);
+      }
 
 	int error_count =0;
 
@@ -787,7 +790,9 @@ public class scanner implements java_cup.runtime.Scanner {
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
             zzDoEOF();
-          { return new java_cup.runtime.Symbol(sym.EOF); }
+              {
+                return symbol("EOF", sym.EOF, yytext());
+              }
       }
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
@@ -802,52 +807,52 @@ public class scanner implements java_cup.runtime.Scanner {
             // fall through
           case 43: break;
           case 3:
-            { return symbol(sym.EX);
+            { return symbol("!", sym.EX);
             }
             // fall through
           case 44: break;
           case 4:
-            { return symbol(sym.MOD);
+            { return symbol("%", sym.MOD);
             }
             // fall through
           case 45: break;
           case 5:
-            { return symbol(sym.ORB);
+            { return symbol("(",sym.ORB);
             }
             // fall through
           case 46: break;
           case 6:
-            { return symbol(sym.CRB);
+            { return symbol(")", sym.CRB);
             }
             // fall through
           case 47: break;
           case 7:
-            { return symbol(sym.STAR);
+            { return symbol("*", sym.STAR);
             }
             // fall through
           case 48: break;
           case 8:
-            { return symbol("PLUS", sym.PLUS, yytext());
+            { return symbol("+", sym.PLUS, yytext());
             }
             // fall through
           case 49: break;
           case 9:
-            { return symbol(sym.COMMA);
+            { return symbol(",", sym.COMMA);
             }
             // fall through
           case 50: break;
           case 10:
-            { return symbol(sym.MINUS);
+            { return symbol("-", sym.MINUS);
             }
             // fall through
           case 51: break;
           case 11:
-            { return symbol(sym.DOT);
+            { return symbol(".", sym.DOT);
             }
             // fall through
           case 52: break;
           case 12:
-            { return symbol(sym.DIVIDE);
+            { return symbol("/", sym.DIVIDE);
             }
             // fall through
           case 53: break;
@@ -857,22 +862,22 @@ public class scanner implements java_cup.runtime.Scanner {
             // fall through
           case 54: break;
           case 14:
-            { return symbol(sym.SEMI_COLON);
+            { return symbol(";", sym.SEMI_COLON);
             }
             // fall through
           case 55: break;
           case 15:
-            { return symbol(sym.LT);
+            { return symbol("<", sym.LT);
             }
             // fall through
           case 56: break;
           case 16:
-            { return symbol(sym.EQ);
+            { return symbol("=", sym.EQ);
             }
             // fall through
           case 57: break;
           case 17:
-            { return symbol(sym.GT);
+            { return symbol(">", sym.GT);
             }
             // fall through
           case 58: break;
@@ -882,62 +887,62 @@ public class scanner implements java_cup.runtime.Scanner {
             // fall through
           case 59: break;
           case 19:
-            { return symbol(sym.OSB);
+            { return symbol("[",sym.OSB);
             }
             // fall through
           case 60: break;
           case 20:
-            { return symbol(sym.CSB);
+            { return symbol("]", sym.CSB);
             }
             // fall through
           case 61: break;
           case 21:
-            { return symbol(sym.OCB);
+            { return symbol("{", sym.OCB);
             }
             // fall through
           case 62: break;
           case 22:
-            { return symbol(sym.CCB);
+            { return symbol("}", sym.CCB);
             }
             // fall through
           case 63: break;
           case 23:
-            { return symbol(sym.NE);
+            { return symbol("!=",sym.NE);
             }
             // fall through
           case 64: break;
           case 24:
-            { return symbol(sym.OPEN_STRING);
+            { return symbol("OPEN_STRING",sym.OPEN_STRING);
             }
             // fall through
           case 65: break;
           case 25:
-            { return symbol(sym.AND);
+            { return symbol("&&", sym.AND);
             }
             // fall through
           case 66: break;
           case 26:
-            { return symbol(sym.LE);
+            { return symbol("<=", sym.LE);
             }
             // fall through
           case 67: break;
           case 27:
-            { return symbol(sym.EQQ);
+            { return symbol("==", sym.EQQ);
             }
             // fall through
           case 68: break;
           case 28:
-            { return symbol(sym.GE);
+            { return symbol(">=", sym.GE);
             }
             // fall through
           case 69: break;
           case 29:
-            { return symbol(sym.IF);
+            { return symbol("IF", sym.IF);
             }
             // fall through
           case 70: break;
           case 30:
-            { return symbol(sym.OR);
+            { return symbol("||", sym.OR);
             }
             // fall through
           case 71: break;
@@ -947,52 +952,52 @@ public class scanner implements java_cup.runtime.Scanner {
             // fall through
           case 72: break;
           case 32:
-            { return symbol(sym.INVALID_ESCAPE_CHARACTER);
+            { return symbol("INVALID_STRING", sym.INVALID_ESCAPE_CHARACTER);
             }
             // fall through
           case 73: break;
           case 33:
-            { return symbol(sym.INT);
+            { return symbol("INT",sym.INT);
             }
             // fall through
           case 74: break;
           case 34:
-            { return symbol(sym.ELSE);
+            { return symbol("ELSE", sym.ELSE);
             }
             // fall through
           case 75: break;
           case 35:
-            { return symbol(sym.TRUE);
+            { return symbol("TRUE",sym.TRUE);
             }
             // fall through
           case 76: break;
           case 36:
-            { return symbol(sym.VOID);
+            { return symbol("VOID", sym.VOID);
             }
             // fall through
           case 77: break;
           case 37:
-            { return symbol(sym.BREAK);
+            { return symbol("BREAK",sym.BREAK);
             }
             // fall through
           case 78: break;
           case 38:
-            { return symbol(sym.FALSE);
+            { return symbol("FALSE",sym.FALSE);
             }
             // fall through
           case 79: break;
           case 39:
-            { return symbol(sym.WHILE);
+            { return symbol("WHILE", sym.WHILE);
             }
             // fall through
           case 80: break;
           case 40:
-            { return symbol(sym.RETURN);
+            { return symbol("RETURN", sym.RETURN);
             }
             // fall through
           case 81: break;
           case 41:
-            { return symbol("boolean",sym.BOOLEAN,yytext());
+            { return symbol("BOOLEAN",sym.BOOLEAN,yytext());
             }
             // fall through
           case 82: break;
