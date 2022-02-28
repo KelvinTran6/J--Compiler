@@ -1,14 +1,24 @@
 /* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
 import java_cup.runtime.*;
+import java.util.ArrayList;
 
 parser code {:
     // Connect this parser to a scanner!
+   Node additive = new Node("additive");
+   Node additiveExpression = new Node("additiveExpression");
+   Node multiplicitive = new Node("multiplicitive");
+   Node multiplicitiveExpression = new Node("multiplicitiveExpression");
+   Node block = new Node("block");
+   Node statementexpression = new Node("statementexpression");
+   Node assignment = new Node("assignment");
+   Node blockstatements = new Node("blockstatements");
+   Node head;
 
+   ArrayList<Node> globalNode = new ArrayList<Node>();
 
-   Node n;
   public parser(scanner s, ComplexSymbolFactory sf, Node n) {
     super(s,sf);
-    this.n = n;
+    this.head = n;
   }
 :}
 
@@ -21,7 +31,7 @@ terminal            IF, WHILE, BOOLEAN, ELSE, BREAK, RETURN, INT, TRUE, FALSE, V
 terminal            GT, GE, LT, LE, EQQ, DOT, ORB, CRB, OCB, CCB, OSB, CSB;
 terminal            AND, OR, SEMI_COLON, COMMA, NE, EX, PLUS, MINUS, EQ;
 terminal            DIVIDE, STAR, MOD, STRING, OPEN_STRING, INVALID_ESCAPE_CHARACTER, ID;
-terminal Integer    NUMBER;
+terminal            NUMBER;
 terminal            SEMI, TIMES;
 terminal            UMINUS, LPAREN, RPAREN;
 
@@ -40,73 +50,73 @@ precedence left STAR, MOD;
 precedence left UMINUS;
 
 /* The grammar rules */
-start_           ::= globaldeclarations : v {:n.addNode(v);:}
+start_           ::= globaldeclarations : v {:head.addNode(v);:}
                 ;
 
-literal         ::= NUMBER
-                | STRING
-                | TRUE
-                | FALSE
+literal         ::= NUMBER:e {:Node n = (Node)((Node)e).clone(); System.out.println(e); RESULT = n;:}
+                | STRING:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
+                | TRUE:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
+                | FALSE:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 ;
 
-type            ::= BOOLEAN
+type            ::= BOOLEAN:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 | INT:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 ;
 
-globaldeclarations      ::= globaldeclaration: g {:Node n = new Node("globaldeclarations"); n.addNode(g); RESULT = n;:}
-                        | globaldeclarations globaldeclaration
+globaldeclarations      ::= globaldeclaration: g {:head.addNode(g);:}
+                        | globaldeclarations globaldeclaration: g {:head.addNode(g);:}
                         ;
 
 globaldeclaration       ::= variabledeclaration: v {:Node n = new Node("globaldeclaration"); n.addNode(v); RESULT = n;:}
-                        | functiondeclaration
+                        | functiondeclaration: e1 {:Node n = new Node ("globaldeclaration"); n.addNode(e1); RESULT = n;:}
                         | mainfunctiondeclaration
                         ;
 
-variabledeclaration     ::= type:t identifier:i SEMI_COLON {:RESULT = n; Node n = new Node("variabledeclaration"); n.addNode(t); n.addNode(i);RESULT = n;:}
+variabledeclaration     ::= type:t identifier:i SEMI_COLON {:Node n = new Node("variabledeclaration"); n.addNode(t); n.addNode(i);RESULT = n;:}
                         ;
 
 identifier              ::= ID:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                         ;
 
-functiondeclaration     ::= functionheader block
+functiondeclaration     ::= functionheader:e1 block:e2 {:System.out.println("tresting");Node n = new Node("functiondeclaration"); n.addNode(e1); n.addNode(e2);RESULT = n;:}
                         ;
 
-functionheader          ::= type functiondeclarator
-                        | VOID functiondeclarator
+functionheader          ::= type:e1 functiondeclarator:e2 {:Node n = new Node("functionheader"); n.addNode(e1); n.addNode(e2); RESULT = n;:}
+                        | VOID:v functiondeclarator:e3 {:Node n = new Node(); n.addNode(v); n.addNode(e3); RESULT = n;:}
                         ;
 
-functiondeclarator      ::= identifier ORB formalparameterlist CRB
+functiondeclarator      ::= identifier:e1 ORB formalparameterlist:e2 CRB {:Node n = new Node("functiondeclarator"); n.addNode(e1); Node n2 = new Node ("parameters"); n2.merge(globalNode); n.addNode(n2); globalNode.clear();RESULT = n;:}
                         | identifier ORB CRB
                         ;
 
-formalparameterlist     ::= formalparameter
-                        | formalparameterlist COMMA formalparameter
+formalparameterlist     ::= formalparameter:e1  {:Node n = (Node)((Node)e1).clone(); globalNode.add(n);:}
+                        | formalparameterlist:e2 COMMA formalparameter:e3 {:Node n = (Node)((Node)e3).clone(); globalNode.add(n);:}
                         ;
 
-formalparameter         ::= type identifier
+formalparameter         ::= type:e1 identifier:e2 {:Node n = new Node(); n.addNode(e1); n.addNode(e2); RESULT = n;:}
                         ;
 
-mainfunctiondeclaration ::= mainfunctiondeclarator block
+mainfunctiondeclaration ::= mainfunctiondeclarator :e1 block:e2 {:Node n = new Node("mainfunctiondeclaration"); n.addNode(e1); n.addNode(e2); head.addNode(n); :}
                         ;
 
-mainfunctiondeclarator  ::= identifier ORB CRB
+mainfunctiondeclarator  ::= identifier:e1 ORB CRB {:RESULT = e1;:}
                         ;
 
-block                   ::= OCB blockstatements CCB
+block                   ::= OCB blockstatements:e1 CCB {:block.addNode(e1); RESULT = block;:}
                         | OCB CCB
                         ;
 
-blockstatements         ::= blockstatement
-                        | blockstatements blockstatement
+blockstatements         ::= blockstatement :e1 {:blockstatements.addNode(e1); RESULT = e1;:}
+                        | blockstatements blockstatement: e1 {:blockstatements.addNode(e1); RESULT = blockstatements;:}
                         ;
 
-blockstatement          ::= variabledeclaration
-                        | statement
+blockstatement          ::= variabledeclaration: e1 {:RESULT = e1;:}
+                        | statement:e2 {:RESULT = e2;:}
                         ;
 
-statement               ::= block
+statement               ::= block: e1 {:RESULT = e1;:}
                         | SEMI_COLON
-                        | statementexpression SEMI_COLON
+                        | statementexpression:e1 SEMI_COLON {:Node n = new Node("statementexpression"); n.addNode(e1); RESULT = n;:}
                         | BREAK SEMI_COLON
                         | RETURN expression SEMI_COLON
                         | RETURN SEMI_COLON
@@ -116,11 +126,11 @@ statement               ::= block
                         ;
 
 
-statementexpression     ::= assignment
+statementexpression     ::= assignment:e1 {:RESULT = e1;:}
                         | functioninvocation
                         ;
 
-primary                 ::= literal
+primary                 ::= literal :e1 {:RESULT = e1;System.out.println(e1);:}
                         | ORB expression CRB
                         | functioninvocation
                         ;
@@ -133,30 +143,30 @@ functioninvocation      ::= identifier ORB argumentlist CRB
                         | identifier ORB CRB
                         ;
 
-postfixexpression       ::= primary
-                        | identifier
+postfixexpression       ::= primary :e1 {:RESULT = e1; System.out.println(e1);:}
+                        | identifier :e2 {:RESULT = e2; System.out.println("postfix2");:}
                         ;
 
-assignment              ::= identifier EQ assignmentexpression
+assignment              ::= identifier:e1 EQ:EQ assignmentexpression:e2 {:Node n = new Node ("assignment");n.addNode(e1); n.addNode(EQ); n.addNode(e2); RESULT = n;:}
                         ;
 
 unaryexpression         ::= MINUS unaryexpression
                         | EX unaryexpression
-                        | postfixexpression
+                        | postfixexpression:e1 {:RESULT = e1; System.out.println(e1);:}
                         ;
 
-multiplicativeexpression::= unaryexpression
-                        | multiplicativeexpression STAR unaryexpression
-                        | multiplicativeexpression DIVIDE unaryexpression
-                        | multiplicativeexpression MOD unaryexpression
+multiplicativeexpression::= unaryexpression:e1 {:RESULT = e1;:}
+                        | multiplicativeexpression:e2 STAR:s unaryexpression:e3 {:Node n = new Node(); n.addNode(e2); n.addNode(s); n.addNode(e3); RESULT = n;:}
+                        | multiplicativeexpression:e4 DIVIDE:d unaryexpression: e5 {:Node n = new Node(); n.addNode(e4); n.addNode(d); n.addNode(e5); RESULT = n;:}
+                        | multiplicativeexpression:e6 MOD:m unaryexpression:e7 {:Node n = new Node(); n.addNode(e6); n.addNode(m); n.addNode(e7); RESULT = n;:}
                         ;
 
-additiveexpression      ::= multiplicativeexpression
-                        | additiveexpression PLUS multiplicativeexpression
-                        | additiveexpression MINUS multiplicativeexpression
+additiveexpression      ::= multiplicativeexpression:e5 {:RESULT = e5;:}
+                        | additiveexpression:e1 PLUS:p multiplicativeexpression:e2 {:Node n = new Node(); n.addNode(e1); n.addNode(p); n.addNode(e2); RESULT = n;:}
+                        | additiveexpression:e3 MINUS:m multiplicativeexpression:e4 {:Node n = new Node(); n.addNode(e3); n.addNode(m); n.addNode(e4); RESULT = n;:}
                         ;
 
-relationalexpression    ::= additiveexpression
+relationalexpression    ::= additiveexpression: e1 {:RESULT = e1;:}
                         | relationalexpression LE additiveexpression
                         | relationalexpression GE additiveexpression
                         | relationalexpression GT additiveexpression
@@ -164,21 +174,21 @@ relationalexpression    ::= additiveexpression
 
                         ;
 
-equalityexpression      ::= relationalexpression
+equalityexpression      ::= relationalexpression: e1 {:RESULT = e1;System.out.println("eq");:}
                         | equalityexpression EQQ relationalexpression
                         | equalityexpression NE relationalexpression
                         ;
 
-conditionalandexpression::= equalityexpression
+conditionalandexpression::= equalityexpression:e1 {:RESULT = e1;System.out.println("condand"); :}
                         | conditionalandexpression AND equalityexpression
                         ;
 
-conditionalorexpression ::= conditionalandexpression
+conditionalorexpression ::= conditionalandexpression:e1 {:RESULT = e1; System.out.println("condor");:}
                         | conditionalorexpression OR conditionalandexpression
                         ;
 
-assignmentexpression    ::= conditionalorexpression
-                        | assignment
+assignmentexpression    ::= conditionalorexpression:e1 {:RESULT = e1; System.out.println("assEx1");:}
+                        | assignment:e1 {:RESULT = e1;System.out.println("assEx2");:}
                         ;
 
 expression              ::= assignmentexpression

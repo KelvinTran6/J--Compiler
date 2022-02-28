@@ -26,24 +26,45 @@ public class Node implements Cloneable{
     }
 
     public void addNode(Object node) throws CloneNotSupportedException {
+        if (node == null){
+            return;
+        }
         Node n = (Node)((Node)node).clone();
+
+        System.out.println(n.hashCode());
+        System.out.println(this.hashCode());
+        if(n.hashCode() == this.hashCode()){
+
+           return;
+        }
         children.add(n);
     }
 
-    public void addLeft(Object left) throws CloneNotSupportedException {
-        Node n = (Node)((Node)left).clone();
-        //System.out.println(n.value);
-        this.left = n;
+    public String toString(){
+        String s = "";
+
+        if(this.value == null){
+            s += this.stage;
+        }
+        else if(this.value.equals("defaul__t")){
+            return "";
+        }
+        else {
+            s+= this.value;
+            s = s + "   (line " + String.valueOf(this.line) + ")";
+        }
+
+        return s;
     }
 
-    public void addRight(Object right) throws CloneNotSupportedException {
-        Node n = (Node)((Node)right).clone();
-       // System.out.println(n.value);
-        this.right = n;
+    public int numOfChildren() {
+        return children.size();
     }
 
-    public int getLine(){
-        return line;
+    public void merge(ArrayList<Node> list) {
+        this.children.addAll(list);
+        System.out.println(this.children.get(0).value);
+
     }
 
     public Object clone() throws CloneNotSupportedException

@@ -43,11 +43,16 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 	private void increment() {
 		error_count++;
 		if(error_count > 10) {
-			System.out.println("too many errors detected... closing program");
+			System.out.println("too many invalid tokens detected... closing program");
 				System.exit(1);
 		}
-
 	}
+
+    private void Error(String error) {
+        System.out.println(error);
+        System.exit(1);
+    }
+
 %}
 
 %init{
@@ -73,7 +78,7 @@ VALID_STRING = (\"([^\\\n]| {ESCAPE_CHARACTERS} )+\")
 
 "if" {return symbol("IF", sym.IF);}
 "while" {return symbol("WHILE", sym.WHILE);}
-"boolean" {return symbol("BOOLEAN",sym.BOOLEAN,yytext());}
+"boolean" {return symbol("BOOLEAN",sym.BOOLEAN);}
 "else" {return symbol("ELSE", sym.ELSE);}
 "break" {return symbol("BREAK",sym.BREAK);}
 "return" {return symbol("RETURN", sym.RETURN);}

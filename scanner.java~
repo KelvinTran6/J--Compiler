@@ -381,11 +381,16 @@ public class scanner implements java_cup.runtime.Scanner {
 	private void increment() {
 		error_count++;
 		if(error_count > 10) {
-			System.out.println("too many errors detected... closing program");
+			System.out.println("too many invalid tokens detected... closing program");
 				System.exit(1);
 		}
-
 	}
+
+    private void Error(String error) {
+        System.out.println(error);
+        System.exit(1);
+    }
+
 
 
   /**
@@ -997,7 +1002,7 @@ public class scanner implements java_cup.runtime.Scanner {
             // fall through
           case 81: break;
           case 41:
-            { return symbol("BOOLEAN",sym.BOOLEAN,yytext());
+            { return symbol("BOOLEAN",sym.BOOLEAN);
             }
             // fall through
           case 82: break;
