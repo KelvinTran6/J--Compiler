@@ -7,15 +7,15 @@
 public class sym {
   /* terminals */
   public static final int DIVIDE = 33;
-  public static final int OSB = 22;
+  public static final int OSB = 23;
   public static final int GE = 13;
-  public static final int UMINUS = 43;
-  public static final int LPAREN = 44;
-  public static final int SEMI = 41;
+  public static final int UMINUS = 42;
+  public static final int LPAREN = 43;
+  public static final int SEMI = 40;
   public static final int INT = 8;
   public static final int MINUS = 31;
   public static final int STAR = 34;
-  public static final int RPAREN = 45;
+  public static final int RPAREN = 44;
   public static final int OCB = 20;
   public static final int AND = 24;
   public static final int LT = 14;
@@ -24,8 +24,8 @@ public class sym {
   public static final int ORB = 18;
   public static final int PLUS = 30;
   public static final int IF = 2;
-  public static final int ID = 39;
-  public static final int CSB = 23;
+  public static final int ID = 38;
+  public static final int CSB = 22;
   public static final int DOT = 17;
   public static final int LE = 15;
   public static final int EOF = 0;
@@ -35,15 +35,14 @@ public class sym {
   public static final int error = 1;
   public static final int EX = 29;
   public static final int SEMI_COLON = 26;
-  public static final int NUMBER = 40;
+  public static final int NUMBER = 39;
   public static final int MOD = 35;
   public static final int BREAK = 6;
   public static final int VOID = 11;
-  public static final int INVALID_ESCAPE_CHARACTER = 38;
+  public static final int INVALID_ESCAPE_CHARACTER = 37;
   public static final int EQ = 32;
-  public static final int TIMES = 42;
+  public static final int TIMES = 41;
   public static final int CCB = 21;
-  public static final int OPEN_STRING = 37;
   public static final int ELSE = 5;
   public static final int EQQ = 16;
   public static final int WHILE = 3;
@@ -75,8 +74,8 @@ public class sym {
   "CRB",
   "OCB",
   "CCB",
-  "OSB",
   "CSB",
+  "OSB",
   "AND",
   "OR",
   "SEMI_COLON",
@@ -90,7 +89,6 @@ public class sym {
   "STAR",
   "MOD",
   "STRING",
-  "OPEN_STRING",
   "INVALID_ESCAPE_CHARACTER",
   "ID",
   "NUMBER",

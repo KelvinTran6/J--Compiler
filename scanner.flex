@@ -25,15 +25,15 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
     }
 
 
-    private Symbol symbol(String name, int type) {
-            Node current = new Node(name, yyline, yycolumn);
-        return symbolFactory.newSymbol(yytext(), type, current);
+    private Symbol symbol(String name, int sym, String tokenName) {
+            Node current = new Node(name, yyline, yycolumn, tokenName);
+        return symbolFactory.newSymbol(yytext(), sym, current);
     }
 
-      private Symbol symbol(String name, int sym, Object val) {
+      private Symbol symbol(String name, int sym, Object val, String tokenName) {
           Location left = new Location(yyline+1,yycolumn+1,(int)yychar);
           Location right= new Location(yyline+1,yycolumn+yylength(), (int)yychar+yylength());
-          Node current = new Node(yytext(), yyline, yycolumn);
+          Node current = new Node(yytext(), yyline, yycolumn, tokenName);
 
           return symbolFactory.newSymbol(name, sym, left, right, current);
       }
@@ -48,7 +48,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 		}
 	}
 
-    private void Error(String error) {
+    private void error(String error) {
         System.out.println(error);
         System.exit(1);
     }
@@ -76,45 +76,45 @@ VALID_STRING = (\"([^\\\n]| {ESCAPE_CHARACTERS} )+\")
 
 "//".*	{} //comments
 
-"if" {return symbol("IF", sym.IF);}
-"while" {return symbol("WHILE", sym.WHILE);}
-"boolean" {return symbol("BOOLEAN",sym.BOOLEAN);}
-"else" {return symbol("ELSE", sym.ELSE);}
-"break" {return symbol("BREAK",sym.BREAK);}
-"return" {return symbol("RETURN", sym.RETURN);}
-"int" {return symbol("INT",sym.INT);}
-"true" {return symbol("TRUE",sym.TRUE);}
-"false" {return symbol("FALSE",sym.FALSE);}
-"void"  {return symbol("VOID", sym.VOID);}
-">"		{return symbol(">", sym.GT);}
-">="		{return symbol(">=", sym.GE);}
-"<"		{return symbol("<", sym.LT);}
-"<="		{return symbol("<=", sym.LE);}
-"=="		{return symbol("==", sym.EQQ);}
-"."		{return symbol(".", sym.DOT);}
-"("		{return symbol("(",sym.ORB);}
-")"		{return symbol(")", sym.CRB);}
-"{"		{return symbol("{", sym.OCB);}
-"}"		{return symbol("}", sym.CCB);}
-"["		{return symbol("[",sym.OSB);}
-"]" 	{return symbol("]", sym.CSB);}
-"&&" 	{return symbol("&&", sym.AND);}
-"||"	{return symbol("||", sym.OR);}
-";"		{return symbol(";", sym.SEMI_COLON);}
-","		{return symbol(",", sym.COMMA);}
-"!="	{return symbol("!=",sym.NE);}
-"!"		{return symbol("!", sym.EX);}
-"+"		{return symbol("+", sym.PLUS, yytext());}
-"-" 	{return symbol("-", sym.MINUS);}
-"=" 	{return symbol("=", sym.EQ);}
-"/" 	{return symbol("/", sym.DIVIDE);}
-"*" 	{return symbol("*", sym.STAR);}
-"%" 	{return symbol("%", sym.MOD);}
+"if" {return symbol("IF", sym.IF, "keyword");}
+"while" {return symbol("WHILE", sym.WHILE ,"keyword");}
+"boolean" {return symbol("BOOLEAN",sym.BOOLEAN,"keyword");}
+"else" {return symbol("ELSE", sym.ELSE,"keyword");}
+"break" {return symbol("BREAK",sym.BREAK,"keyword");}
+"return" {return symbol("RETURN", sym.RETURN,"keyword");}
+"int" {return symbol("INT",sym.INT,"keyword");}
+"true" {return symbol("TRUE",sym.TRUE,"Boolean");}
+"false" {return symbol("FALSE",sym.FALSE,"Boolean");}
+"void"  {return symbol("VOID", sym.VOID,"keyword");}
+">"		{return symbol(">", sym.GT,"Symbol");}
+">="		{return symbol(">=", sym.GE,"Symbol");}
+"<"		{return symbol("<", sym.LT,"Symbol");}
+"<="		{return symbol("<=", sym.LE,"Symbol");}
+"=="		{return symbol("==", sym.EQQ,"Symbol");}
+"."		{return symbol(".", sym.DOT,"Symbol");}
+"("		{return symbol("(",sym.ORB,"Symbol");}
+")"		{return symbol(")", sym.CRB,"Symbol");}
+"{"		{return symbol("{", sym.OCB,"Symbol");}
+"}"		{return symbol("}", sym.CCB,"Symbol");}
+"["		{return symbol("[",sym.OSB,"Symbol");}
+"]" 	{return symbol("]", sym.CSB,"Symbol");}
+"&&" 	{return symbol("&&", sym.AND,"Symbol");}
+"||"	{return symbol("||", sym.OR,"Symbol");}
+";"		{return symbol(";", sym.SEMI_COLON,"Symbol");}
+","		{return symbol(",", sym.COMMA,"Symbol");}
+"!="	{return symbol("!=",sym.NE,"Symbol");}
+"!"		{return symbol("!", sym.EX,"Symbol");}
+"+"		{return symbol("+", sym.PLUS, yytext(),"Symbol");}
+"-" 	{return symbol("-", sym.MINUS,"Symbol");}
+"=" 	{return symbol("=", sym.EQ,"Symbol");}
+"/" 	{return symbol("/", sym.DIVIDE,"Symbol");}
+"*" 	{return symbol("*", sym.STAR,"Symbol");}
+"%" 	{return symbol("%", sym.MOD,"Symbol");}
 
-{NUMBER} {return symbol("NUMBER", sym.NUMBER, yytext());}
-{VALID_STRING}	{return symbol("STRING", sym.STRING, yytext().substring(1, yytext().length()-1));}
-{OPEN_STRING} {return symbol("OPEN_STRING",sym.OPEN_STRING);}
-{INVALID_ESCAPE_CHARACTER} {return symbol("INVALID_STRING", sym.INVALID_ESCAPE_CHARACTER);}
-{ID}		{return symbol("ID", sym.ID, yytext());}
-<<EOF>>                          { return symbol("EOF", sym.EOF, yytext()); }
-[^]		{increment(); throw new Error("Illegal character <"+yytext()+">");}
+{NUMBER} {return symbol("NUMBER", sym.NUMBER, yytext(),"NUMBER");}
+{VALID_STRING}	{return symbol("STRING", sym.STRING, yytext().substring(1, yytext().length()-1) ,"String");}
+{OPEN_STRING} {increment(); error("Open string ["+yytext()+"] found on line: " + yyline);}
+{INVALID_ESCAPE_CHARACTER} {increment(); error("Invalid escape character ["+yytext()+"] found on line: " + yyline);}
+{ID}		{return symbol("ID", sym.ID, yytext(),"ID");}
+<<EOF>>                          { return symbol("EOF", sym.EOF, yytext(),"keyword"); }
+[^]		{increment(); error("Illegal character ["+yytext()+"] found on line: " + yyline);}

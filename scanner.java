@@ -363,15 +363,15 @@ public class scanner implements java_cup.runtime.Scanner {
     }
 
 
-    private Symbol symbol(String name, int type) {
-            Node current = new Node(name, yyline, yycolumn);
-        return symbolFactory.newSymbol(yytext(), type, current);
+    private Symbol symbol(String name, int sym, String tokenName) {
+            Node current = new Node(name, yyline, yycolumn, tokenName);
+        return symbolFactory.newSymbol(yytext(), sym, current);
     }
 
-      private Symbol symbol(String name, int sym, Object val) {
+      private Symbol symbol(String name, int sym, Object val, String tokenName) {
           Location left = new Location(yyline+1,yycolumn+1,(int)yychar);
           Location right= new Location(yyline+1,yycolumn+yylength(), (int)yychar+yylength());
-          Node current = new Node(yytext(), yyline, yycolumn);
+          Node current = new Node(yytext(), yyline, yycolumn, tokenName);
 
           return symbolFactory.newSymbol(name, sym, left, right, current);
       }
@@ -386,7 +386,7 @@ public class scanner implements java_cup.runtime.Scanner {
 		}
 	}
 
-    private void Error(String error) {
+    private void error(String error) {
         System.out.println(error);
         System.exit(1);
     }
@@ -796,13 +796,13 @@ public class scanner implements java_cup.runtime.Scanner {
         zzAtEOF = true;
             zzDoEOF();
               {
-                return symbol("EOF", sym.EOF, yytext());
+                return symbol("EOF", sym.EOF, yytext(),"keyword");
               }
       }
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { increment(); throw new Error("Illegal character <"+yytext()+">");
+            { increment(); error("Illegal character ["+yytext()+"] found on line: " + yyline);
             }
             // fall through
           case 42: break;
@@ -812,197 +812,197 @@ public class scanner implements java_cup.runtime.Scanner {
             // fall through
           case 43: break;
           case 3:
-            { return symbol("!", sym.EX);
+            { return symbol("!", sym.EX,"Symbol");
             }
             // fall through
           case 44: break;
           case 4:
-            { return symbol("%", sym.MOD);
+            { return symbol("%", sym.MOD,"Symbol");
             }
             // fall through
           case 45: break;
           case 5:
-            { return symbol("(",sym.ORB);
+            { return symbol("(",sym.ORB,"Symbol");
             }
             // fall through
           case 46: break;
           case 6:
-            { return symbol(")", sym.CRB);
+            { return symbol(")", sym.CRB,"Symbol");
             }
             // fall through
           case 47: break;
           case 7:
-            { return symbol("*", sym.STAR);
+            { return symbol("*", sym.STAR,"Symbol");
             }
             // fall through
           case 48: break;
           case 8:
-            { return symbol("+", sym.PLUS, yytext());
+            { return symbol("+", sym.PLUS, yytext(),"Symbol");
             }
             // fall through
           case 49: break;
           case 9:
-            { return symbol(",", sym.COMMA);
+            { return symbol(",", sym.COMMA,"Symbol");
             }
             // fall through
           case 50: break;
           case 10:
-            { return symbol("-", sym.MINUS);
+            { return symbol("-", sym.MINUS,"Symbol");
             }
             // fall through
           case 51: break;
           case 11:
-            { return symbol(".", sym.DOT);
+            { return symbol(".", sym.DOT,"Symbol");
             }
             // fall through
           case 52: break;
           case 12:
-            { return symbol("/", sym.DIVIDE);
+            { return symbol("/", sym.DIVIDE,"Symbol");
             }
             // fall through
           case 53: break;
           case 13:
-            { return symbol("NUMBER", sym.NUMBER, yytext());
+            { return symbol("NUMBER", sym.NUMBER, yytext(),"NUMBER");
             }
             // fall through
           case 54: break;
           case 14:
-            { return symbol(";", sym.SEMI_COLON);
+            { return symbol(";", sym.SEMI_COLON,"Symbol");
             }
             // fall through
           case 55: break;
           case 15:
-            { return symbol("<", sym.LT);
+            { return symbol("<", sym.LT,"Symbol");
             }
             // fall through
           case 56: break;
           case 16:
-            { return symbol("=", sym.EQ);
+            { return symbol("=", sym.EQ,"Symbol");
             }
             // fall through
           case 57: break;
           case 17:
-            { return symbol(">", sym.GT);
+            { return symbol(">", sym.GT,"Symbol");
             }
             // fall through
           case 58: break;
           case 18:
-            { return symbol("ID", sym.ID, yytext());
+            { return symbol("ID", sym.ID, yytext(),"ID");
             }
             // fall through
           case 59: break;
           case 19:
-            { return symbol("[",sym.OSB);
+            { return symbol("[",sym.OSB,"Symbol");
             }
             // fall through
           case 60: break;
           case 20:
-            { return symbol("]", sym.CSB);
+            { return symbol("]", sym.CSB,"Symbol");
             }
             // fall through
           case 61: break;
           case 21:
-            { return symbol("{", sym.OCB);
+            { return symbol("{", sym.OCB,"Symbol");
             }
             // fall through
           case 62: break;
           case 22:
-            { return symbol("}", sym.CCB);
+            { return symbol("}", sym.CCB,"Symbol");
             }
             // fall through
           case 63: break;
           case 23:
-            { return symbol("!=",sym.NE);
+            { return symbol("!=",sym.NE,"Symbol");
             }
             // fall through
           case 64: break;
           case 24:
-            { return symbol("OPEN_STRING",sym.OPEN_STRING);
+            { increment(); error("Open string ["+yytext()+"] found on line: " + yyline);
             }
             // fall through
           case 65: break;
           case 25:
-            { return symbol("&&", sym.AND);
+            { return symbol("&&", sym.AND,"Symbol");
             }
             // fall through
           case 66: break;
           case 26:
-            { return symbol("<=", sym.LE);
+            { return symbol("<=", sym.LE,"Symbol");
             }
             // fall through
           case 67: break;
           case 27:
-            { return symbol("==", sym.EQQ);
+            { return symbol("==", sym.EQQ,"Symbol");
             }
             // fall through
           case 68: break;
           case 28:
-            { return symbol(">=", sym.GE);
+            { return symbol(">=", sym.GE,"Symbol");
             }
             // fall through
           case 69: break;
           case 29:
-            { return symbol("IF", sym.IF);
+            { return symbol("IF", sym.IF, "keyword");
             }
             // fall through
           case 70: break;
           case 30:
-            { return symbol("||", sym.OR);
+            { return symbol("||", sym.OR,"Symbol");
             }
             // fall through
           case 71: break;
           case 31:
-            { return symbol("STRING", sym.STRING, yytext().substring(1, yytext().length()-1));
+            { return symbol("STRING", sym.STRING, yytext().substring(1, yytext().length()-1) ,"String");
             }
             // fall through
           case 72: break;
           case 32:
-            { return symbol("INVALID_STRING", sym.INVALID_ESCAPE_CHARACTER);
+            { increment(); error("Invalid escape character ["+yytext()+"] found on line: " + yyline);
             }
             // fall through
           case 73: break;
           case 33:
-            { return symbol("INT",sym.INT);
+            { return symbol("INT",sym.INT,"keyword");
             }
             // fall through
           case 74: break;
           case 34:
-            { return symbol("ELSE", sym.ELSE);
+            { return symbol("ELSE", sym.ELSE,"keyword");
             }
             // fall through
           case 75: break;
           case 35:
-            { return symbol("TRUE",sym.TRUE);
+            { return symbol("TRUE",sym.TRUE,"Boolean");
             }
             // fall through
           case 76: break;
           case 36:
-            { return symbol("VOID", sym.VOID);
+            { return symbol("VOID", sym.VOID,"keyword");
             }
             // fall through
           case 77: break;
           case 37:
-            { return symbol("BREAK",sym.BREAK);
+            { return symbol("BREAK",sym.BREAK,"keyword");
             }
             // fall through
           case 78: break;
           case 38:
-            { return symbol("FALSE",sym.FALSE);
+            { return symbol("FALSE",sym.FALSE,"Boolean");
             }
             // fall through
           case 79: break;
           case 39:
-            { return symbol("WHILE", sym.WHILE);
+            { return symbol("WHILE", sym.WHILE ,"keyword");
             }
             // fall through
           case 80: break;
           case 40:
-            { return symbol("RETURN", sym.RETURN);
+            { return symbol("RETURN", sym.RETURN,"keyword");
             }
             // fall through
           case 81: break;
           case 41:
-            { return symbol("BOOLEAN",sym.BOOLEAN);
+            { return symbol("BOOLEAN",sym.BOOLEAN,"keyword");
             }
             // fall through
           case 82: break;

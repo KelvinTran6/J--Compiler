@@ -7,6 +7,7 @@ public class Node implements Cloneable{
     int col;
     Node left;
     Node right;
+    String type;
     ArrayList<Node> children = new ArrayList<Node>();
 
     public Node() {
@@ -18,10 +19,11 @@ public class Node implements Cloneable{
         this.children = new ArrayList<Node>();
     }
 
-    public Node (String value, int line, int col) {
+    public Node (String value, int line, int col, String type) {
         this.value = value;
         this.line = line;
         this.col = col;
+        this.type = type;
         this.children = new ArrayList<Node>();
     }
 
@@ -30,9 +32,6 @@ public class Node implements Cloneable{
             return;
         }
         Node n = (Node)((Node)node).clone();
-
-        System.out.println(n.hashCode());
-        System.out.println(this.hashCode());
         if(n.hashCode() == this.hashCode()){
 
            return;
@@ -50,7 +49,8 @@ public class Node implements Cloneable{
             return "";
         }
         else {
-            s+= this.value;
+            s+= "{Type: " + this.type + ", Value: ";
+            s+= this.value +"}";
             s = s + "   (line " + String.valueOf(this.line) + ")";
         }
 
@@ -62,8 +62,11 @@ public class Node implements Cloneable{
     }
 
     public void merge(ArrayList<Node> list) {
+
+        if(list.isEmpty()){
+            return;
+        }
         this.children.addAll(list);
-        System.out.println(this.children.get(0).value);
 
     }
 

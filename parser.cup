@@ -15,11 +15,23 @@ parser code {:
    Node head;
 
    ArrayList<Node> globalNode = new ArrayList<Node>();
+   ArrayList<Node> blockArray = new ArrayList<Node>();
+   Node global = new Node();
+
+   static int index = 0;
+   static int state = 0;
 
   public parser(scanner s, ComplexSymbolFactory sf, Node n) {
     super(s,sf);
     this.head = n;
   }
+    @Override
+    public void report_error(String message, Object o) {
+        Symbol s = (Symbol) o;
+        Node current = (Node) s.value;
+        System.out.println(message + " around line: " + current.line + " unexpected token: " + current.value);
+        System.exit(1);
+    }
 :}
 
 /* define how to connect to the scanner! */
@@ -28,9 +40,9 @@ parser code {:
 
 /* Terminals (tokens returned by the scanner). */
 terminal            IF, WHILE, BOOLEAN, ELSE, BREAK, RETURN, INT, TRUE, FALSE, VOID;
-terminal            GT, GE, LT, LE, EQQ, DOT, ORB, CRB, OCB, CCB, OSB, CSB;
+terminal            GT, GE, LT, LE, EQQ, DOT, ORB, CRB, OCB, CCB, CSB, OSB;
 terminal            AND, OR, SEMI_COLON, COMMA, NE, EX, PLUS, MINUS, EQ;
-terminal            DIVIDE, STAR, MOD, STRING, OPEN_STRING, INVALID_ESCAPE_CHARACTER, ID;
+terminal            DIVIDE, STAR, MOD, STRING, INVALID_ESCAPE_CHARACTER, ID;
 terminal            NUMBER;
 terminal            SEMI, TIMES;
 terminal            UMINUS, LPAREN, RPAREN;
@@ -53,7 +65,7 @@ precedence left UMINUS;
 start_           ::= globaldeclarations : v {:head.addNode(v);:}
                 ;
 
-literal         ::= NUMBER:e {:Node n = (Node)((Node)e).clone(); System.out.println(e); RESULT = n;:}
+literal         ::= NUMBER:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 | STRING:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 | TRUE:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
                 | FALSE:e {:Node n = (Node)((Node)e).clone(); RESULT = n;:}
@@ -102,12 +114,12 @@ mainfunctiondeclaration ::= mainfunctiondeclarator :e1 block:e2 {:Node n = new N
 mainfunctiondeclarator  ::= identifier:e1 ORB CRB {:RESULT = e1;:}
                         ;
 
-block                   ::= OCB blockstatements:e1 CCB {:Node n = new Node("block"); n.merge(globalNode); globalNode.clear() ;RESULT = n;:}
+block                   ::= OCB blockstatements:e1 CCB {:Node n = new Node("block"); System.out.println(n.toString()); n.merge(globalNode); globalNode.clear() ;RESULT = n;:}
                         | OCB CCB
                         ;
 
-blockstatements         ::= blockstatement :e1 {:Node n = (Node)((Node)e1).clone(); globalNode.add(n);:}
-                        | blockstatements blockstatement: e1 {:Node n = (Node)((Node)e1).clone(); globalNode.add(n);:}
+blockstatements         ::= blockstatement :e1 {:Node n = (Node)((Node)e1).clone(); globalNode.add(n); System.out.println(n.toString());:}
+                        | blockstatements blockstatement: e1 {:Node n = (Node)((Node)e1).clone(); globalNode.add(n); System.out.println(n.toString());:}
                         ;
 
 blockstatement          ::= variabledeclaration: e1 {:RESULT = e1;:}
@@ -119,9 +131,9 @@ statement               ::= block: e1 {:RESULT = e1;:}
                         | statementexpression:e1 SEMI_COLON {:Node n = new Node("statement"); n.addNode(e1); RESULT = n;:}
                         | BREAK: b SEMI_COLON:sc {:RESULT = b;:}
                         | RETURN:r expression:e1 SEMI_COLON {:Node n = new Node("statement"); n.addNode(r); n.addNode(e1); RESULT = n;:}
-                        | RETURN:r SEMI_COLON  {:Node n = new Node("statement"); n.addNode(r); RESULT = n;:}
-                        | IF:i ORB expression:e1 CRB statement:e2 {:Node n = new Node("statement");n.addNode(i); n.addNode(e1); n.addNode(e2); RESULT = n;:}
-                        | IF:i ORB expression:e1 CRB statement:e2 ELSE:e statement:e3 {:Node n = new Node("statement");n.addNode(i); n.addNode(e1); n.addNode(e2); n.addNode(e);n.addNode(e3); RESULT = n;:}
+                        | RETURN:r SEMI_COLON  {:Node n = new Node("statement"); System.out.println("returnnign"); n.addNode(r); RESULT = n;:}
+                        | IF:i ORB expression:e1 CRB statement:e2 {:Node n = new Node("if statement"); System.out.println(n.toString()); n.addNode(i); n.addNode(e1); n.addNode(e2); RESULT = n;:}
+                        | IF:i ORB expression:e1 CRB statement:e2 ELSE:e statement:e3 {:Node n = new Node("if statement");n.addNode(i); n.addNode(e1); n.addNode(e2); n.addNode(e);n.addNode(e3); RESULT = n;:}
                         | WHILE:w ORB expression:e1 CRB statement:e2 {:Node n = new Node("statement");n.addNode(w); n.addNode(e1); n.addNode(e2); RESULT = n;:}
                         ;
 
@@ -152,7 +164,7 @@ assignment              ::= identifier:e1 EQ:EQ assignmentexpression:e2 {:Node n
 
 unaryexpression         ::= MINUS:m unaryexpression:e1 {:Node n = new Node ("unaryexpression"); n.addNode(m); n.addNode(e1); RESULT = n;:}
                         | EX:ex unaryexpression:e1 {:Node n = new Node ("unaryexpression"); n.addNode(ex); n.addNode(e1); RESULT = n;:}
-                        | postfixexpression:e1 {:RESULT = e1; System.out.println(e1);:}
+                        | postfixexpression:e1 {:RESULT = e1;:}
                         ;
 
 multiplicativeexpression::= unaryexpression:e1 {:RESULT = e1;:}
@@ -174,7 +186,7 @@ relationalexpression    ::= additiveexpression: e1 {:RESULT = e1;:}
 
                         ;
 
-equalityexpression      ::= relationalexpression: e1 {:RESULT = e1;System.out.println("eq");:}
+equalityexpression      ::= relationalexpression: e1 {:RESULT = e1;:}
                         | equalityexpression:e1 EQQ:eqq relationalexpression:e2 {:Node n = new Node(); n.addNode(e1); n.addNode(eqq); n.addNode(e2); RESULT = n;:}
                         | equalityexpression:e1 NE:ne relationalexpression:e2 {:Node n = new Node(); n.addNode(e1); n.addNode(ne); n.addNode(e2); RESULT = n;:}
                         ;
@@ -193,4 +205,3 @@ assignmentexpression    ::= conditionalorexpression:e1 {:RESULT = e1;:}
 
 expression              ::= assignmentexpression:e1 {:Node n = new Node("expression"); n.addNode(e1); RESULT = n;:}
                         ;
-
